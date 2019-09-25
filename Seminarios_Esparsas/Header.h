@@ -38,7 +38,6 @@ struct vertice{
 	}
 };
 
-
 vector<arco> ler_instancia(const char * filename) {
 	ifstream instancia(filename, ifstream::in);
 	if (instancia.fail()) {
@@ -167,7 +166,6 @@ vector<arco> Cuthill_Mckee(vector<arco> G, int n) {
 	for (auto a: G){
 		G_new.push_back(arco(transformar[a.i], transformar[a.j], a.v));
 	}
-
 
 	return G_new;
 }
