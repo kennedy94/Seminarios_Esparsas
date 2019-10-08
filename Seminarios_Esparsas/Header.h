@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <numeric>
 #include <fstream>
+#include <list>>
 
 using namespace std;
 
@@ -31,10 +32,20 @@ struct vertice{
 	bool operator <(const vertice d) {
 		return this->grau < d.grau;
 	}
+
+	bool operator ==(const vertice d) {
+		return this->grau == d.grau;
+	}
 	vertice(int i, int j) {
 		label = i;
 		grau = j;
 		visitado = false;
+	}
+	vertice() {
+		label = -1;
+		grau = -1;
+		visitado = false;
+
 	}
 };
 
@@ -56,6 +67,7 @@ vector<arco> ler_instancia(const char * filename) {
 		G.push_back(arco(i, j, v));
 
 	}
+	instancia.close();
 	return G;
 }
 
@@ -87,6 +99,29 @@ void imprimir_matriz(vector<arco> G, int n) {
 	}
 }
 
+void inserir_ordenado(vector<vertice> &V, vertice v) {
+	vector<vertice>::iterator pos;
+	if (V.size() != 0) {
+		bool encontrou = false;
+		for (vector<vertice>::iterator it = V.begin(); it != V.end(); it++) {
+			if (*it < v) {
+				pos = it;
+				break;
+				encontrou = true;
+			}
+		}
+		if (encontrou) {
+			V.insert(pos, v);
+			v.visitado = true;
+		}
+		else {
+			V.insert(V.begin(), v);
+		}
+	}
+	else {
+		V.push_back(v);
+	}
+}
 
 //Assuma que a o grafo G é conexo e que a matriz é irredutível
 //retornando o reverso
@@ -105,49 +140,39 @@ vector<arco> Cuthill_Mckee(vector<arco> G, int n) {
 	}
 
 	//jogar dados na estrutura de vértice
-	vector<vertice> Vert;
+	vector<vertice> Vert(n);
 	for (int i = 0; i < n; i++) {
-		vertice v = vertice(i, Graus[i]);
-		v.adj = adj[i];
-		Vert.push_back(v);
+		Vert[i] = vertice(i, Graus[i]);
+		Vert[i].adj = adj[i];
 	}
 
 	//para cada vértice adicionar adjacentes por ordem de grau
 
-	//Montar S1
-	vector<int> permutacao;
+	list<vertice> filhos;
+
+	//Nó inicial
+	vector<int> permutacao(n, -1);
 	vertice &min = *min_element(Vert.begin(), Vert.end());
 	min.visitado = true;
-	permutacao.push_back(min.label);
+	int itp = 0;
+	permutacao[itp] = min.label;
+	itp++;
 
-	//Montar S2
 	vector<vertice> aux;
-	for (auto v : Vert[min.label].adj) {
-		aux.push_back(Vert[v]);
-		Vert[v].visitado = true;
-	}
-	sort(aux.begin(), aux.end());
-	for (auto a: aux){
-		permutacao.push_back(a.label);
-	}
 
-	aux.clear();
-
-	for (int i = 1; i < n; i++){
-
+	for (int i = 0; i < n; i++){
 		//percorrer seus filhos e adicioná-los em ordem de grau caso não tenham sido visitados
 		for (auto filho: Vert[permutacao[i]].adj) {
 			//se for filho e ainda não foi visitado
 			if (Vert[filho].visitado == false) {
-				aux.push_back(Vert[filho]);
+				inserir_ordenado(aux, Vert[filho]);
 				Vert[filho].visitado = true;
 			}
 		}
-		sort(aux.begin(), aux.end());
 		for (auto a : aux) {
-			permutacao.push_back(a.label);
+			permutacao[itp] = a.label;
+			itp++;
 		}
-
 		aux.clear();
 	}
 
@@ -169,3 +194,4 @@ vector<arco> Cuthill_Mckee(vector<arco> G, int n) {
 
 	return G_new;
 }
+
