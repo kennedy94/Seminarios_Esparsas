@@ -57,6 +57,8 @@ struct vertice{
 };
 
 void countSort(vector<vertice> &array, int max);
+list<list<arco>> REFINED_QUOCIENT_TREES(vector<vertice> V_ord_por_nivel, vector<vertice> V_ordenado_por_label);
+list<vertice> SPAN(vector<vertice> Vertices, int v_label);
 
 vector<arco> ler_instancia(const char * filename) {
 	ifstream instancia(filename, ifstream::in);
@@ -216,18 +218,126 @@ vector<arco> Reversed_Cuthill_Mckee(vector<arco> G, int n) {
 	for (int i = 0; i < G.size(); i++)
 		G_new[i] = arco(transformar[G[i].i], transformar[G[i].j], G[i].v);
 
-	countSort(Vert, n_particoes);
+
+	//Árvore Quociente Refinada
+	vector<vertice> Vert_ord = Vert;
+	countSort(Vert_ord, n_particoes);
+
+	REFINED_QUOCIENT_TREES(Vert_ord, Vert);
 
 	return G_new;
 }
 
 
-list<list<arco>> REFINED_QUOCIENT_TREES(vector<arco> G, int n) {
+list<list<arco>> REFINED_QUOCIENT_TREES(vector<vertice> V_ord_por_nivel, vector<vertice> V_ordenado_por_label) {
 
-	stack<list<arco>> pilha();
+Step_0:
+	stack<vertice> pilha;
+	list<list<vertice>> Particao, Particao_final;
+	int k = 0; //maior indice da particao
+	for (auto v : V_ord_por_nivel) {
+		if (v.particao > k)
+			k = v.particao;
+	}
+	
 
+	//transformar estrutura de níveis em uma lista de listas de vértices
+	list<vertice> temp;
+	int j = 0;
+	for (int i = 0; i < V_ord_por_nivel.size(); i++) {
+		if (V_ord_por_nivel[i].particao == j) {
+			temp.push_back(V_ord_por_nivel[i]);
+		}
+		else
+		{
+			Particao.push_back(temp);
+			temp.clear();
+			j++;
+			temp.push_back(V_ord_por_nivel[i]);
+		}
+		if (i == V_ord_por_nivel.size() - 1) {
+			Particao.push_back(temp);
+			temp.clear();
+		}
+	}
+	temp = Particao.back();
+	vertice y = temp.back();
+	list<vertice> S;
+	S.push_back(y);
 
+	while (k >= 0){
+		//Step 1
+		while (pilha.size() != 0 && pilha.top().particao == k) {
+			S.push_back(pilha.top());
+			pilha.pop();
+		}
+		
 
+		//Step 2
+		list<vertice> Y;
+		queue<vertice> fila;
+		vector<bool> visitado(V_ordenado_por_label.size(), false);
+		for (auto it : S) {
+			if (!visitado[it.label]) {
+				fila.push(it);
+				visitado[it.label] = true;
+			}
+			for (auto adj : it.adj) {
+				if (V_ordenado_por_label[adj].particao == k && !visitado[V_ordenado_por_label[adj].label]){
+					fila.push(V_ordenado_por_label[adj]);
+					visitado[V_ordenado_por_label[adj].label] = true;
+				}
+			}
+		}
+
+		while (fila.size() != 0){
+			vertice aux = fila.front();
+			Y.push_back(aux);
+			visitado[aux.label] = true;
+			fila.pop();
+
+			for (auto adj : aux.adj) {
+				if (V_ordenado_por_label[adj].particao == k && !visitado[V_ordenado_por_label[adj].label]) {
+					fila.push(V_ordenado_por_label[adj]);
+					visitado[V_ordenado_por_label[adj].label] = true;
+				}
+			}		
+		}
+
+		//Determinar Adj(Y) intersecao L_{k+1}
+		list<vertice> Conj_inter;
+		for (auto it : Y) {
+			for (auto adj : it.adj) {
+				if (V_ordenado_por_label[adj].particao == k + 1 && !visitado[V_ordenado_por_label[adj].label]) {
+					fila.push(V_ordenado_por_label[adj]);
+					visitado[V_ordenado_por_label[adj].label] = true;
+				}
+			}
+		}
+
+		if (Conj_inter.size() == 0){
+			//falta if
+			//Step 3
+			Particao_final.push_back(Y);
+			S.clear();
+			//Step 4
+			for (auto ver : Y) {
+				for (auto adj : ver.adj) {
+					if (V_ordenado_por_label[adj].particao == k - 1)
+						S.push_back(V_ordenado_por_label[adj]);
+				}
+			}
+			Y.clear();
+			k--;
+		}
+		else {
+			//Step 5
+			for (auto s : S) {
+				pilha.push(s);
+			}
+		}
+		
+	}
 
 	return list<list<arco>>();
 }
@@ -297,4 +407,31 @@ void countSort(vector<vertice> &array, int max) {
 	for (int i = 0; i < n; i++) {
 		array[i] = output[i + 1]; //store output array to main array
 	}
+}
+
+
+list<vertice> SPAN(vector<vertice> Vertices, int v_label) {
+	list<vertice> Y;
+	vector<bool> visitados(Vertices.size(), false);
+
+	stack<vertice> pilha;
+	visitados[v_label] = true;
+
+	for (auto adj : Vertices[v_label].adj) {
+		pilha.push(Vertices[adj]);
+		visitados[Vertices[adj].label] = true;
+	}
+
+	while (pilha.size() != 0) {
+		int v = pilha.top().label;
+		Y.push_back(pilha.top());
+		pilha.pop();
+		for (auto adj : Vertices[v].adj){
+			if (!visitados[Vertices[adj].label]) {
+				pilha.push(Vertices[adj]);
+				visitados[Vertices[adj].label] = true;
+			}
+		}
+	}
+	return Y;
 }
