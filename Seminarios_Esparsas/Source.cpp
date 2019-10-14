@@ -1,9 +1,8 @@
 #include "Header.h"
 
 void main() {
-	//vector<vector<int>> MATRIZ = { { 0, 1, 1 },{ 1, 2, 1 },{ 1, 3, 1 },{ 1, 4, 1 },{ 1, 5, 1 },{ 1, 6, 1 } };
 
-	char *arquivo = "matrix_exemplo_10.txt";
+	char *arquivo = "matriz_trees.txt";
 	ifstream instancia(arquivo, ifstream::in);
 	int n, tau;
 	instancia >> n >> tau;
@@ -16,8 +15,9 @@ void main() {
 
 	cout << endl << endl;
 
-	imprimir_matriz(Cuthill_Mckee(G, n), n);
+	imprimir_matriz(Reversed_Cuthill_Mckee(G, n), n);
 
-	cout << "Hello World!" << endl;
+
+	cout << endl;
 
 }
