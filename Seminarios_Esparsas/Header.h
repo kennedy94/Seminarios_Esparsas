@@ -83,11 +83,11 @@ vector<arco> ler_instancia(const char * filename) {
 		int i, j; float v;
 
 		instancia >> i >> j >> v;
-
-		G[it] = arco(i, j, v);
-
+		if(i != j)
+			G[it] = arco(i, j, v);
 	}
 	instancia.close();
+
 	return G;
 }
 
@@ -195,14 +195,13 @@ vector<arco> Reversed_Cuthill_Mckee(vector<arco> G, int n) {
 			//se for filho e ainda não foi visitado
 			if (Vert[filho].visitado == false) {
 				aux.push_back(Vert[filho]);
-				//inserir_ordenado(aux, Vert[filho]);
 				Vert[filho].visitado = true;
-				Vert[filho].particao = Vert[permutacao[i]].particao + 1; //filho pertence a particao do pai +1
-
+				Vert[filho].particao = Vert[permutacao[i]].particao + 1; //filho pertence a particao do pai + 1
 				n_particoes = Vert[filho].particao + 1; // guardar o número de particoes no momento;
 			}
 		}
 		insertion_sort_m(aux);
+		//sort(aux.begin(), aux.end());
 		for (auto a : aux) {
 			permutacao[itp] = a.label;
 			itp++;
@@ -359,7 +358,8 @@ void insertion_sort_m(vector<vertice> &P) {
 
 	int N = P.size();
 	P.push_back(vertice());
-	vector<int> B(N, 0);
+	
+	vector<int> B(P.size(), 0);
 
 	B[N-1] = 0;
 
@@ -372,30 +372,29 @@ void insertion_sort_m(vector<vertice> &P) {
 				B[k] = B[k + 1] + 1;
 				continue;
 			}
-			vertice temp = P[k];
-			
-			int l = k + 1;
-			
-			while(true){
-				P[l - 1] = P[l + B[l]];
-				B[l - 1] = B[l];
+			else {
+				vertice temp = P[k];
 
-				l += B[l] + 1;
+				int l = k + 1;
 
-				if (l > N - 1 || P[l] >= temp) {
-					P[l - 1] = temp;
-					if (P[l] == temp) {
-						B[l - 1] = B[l] + 1;
+				while(true) {
+					P[l - 1] = P[l + B[l]];
+					B[l - 1] = B[l];
+
+					l += B[l] + 1;
+
+					if (l > N - 1 || P[l] >= temp) {
+						P[l - 1] = temp;
+						if (P[l] == temp) {
+							B[l - 1] = B[l] + 1;
+						}
+						else {
+							B[l - 1] = 0;
+						}
+						break;
 					}
-					else {
-						B[l - 1] = 0;
-					}
-					break;
 				}
-
-				
 			}
-
 		}
 	}
 
@@ -423,7 +422,6 @@ void countSort(vector<vertice> &array, int max) {
 	}
 }
 
-
 vector<int> countSort_grau(vector<int> graus) {
 	
 	int n = graus.size();
@@ -450,7 +448,6 @@ vector<int> countSort_grau(vector<int> graus) {
 	return saida;
 }
 
-
 list<vertice> SPAN(vector<vertice> Vertices, int v_label) {
 	list<vertice> Y;
 	vector<bool> visitados(Vertices.size(), false);
@@ -475,4 +472,16 @@ list<vertice> SPAN(vector<vertice> Vertices, int v_label) {
 		}
 	}
 	return Y;
+}
+
+void imprimir_matriz_txt(vector<arco> G, int n) {
+	ofstream saida("matriz_pos_CM.txt");
+
+	saida << n << " " << G.size() << endl;
+	for (auto a : G) 
+		saida << a.i+1 << " " << a.j+1 << " " << 1 << endl;
+	for (int i = 1; i <= n; i++)
+		saida << i << " " << i << " " << 1 << endl;
+
+	saida.close();
 }

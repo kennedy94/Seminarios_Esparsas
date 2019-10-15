@@ -1,8 +1,8 @@
 #include "Header.h"
-
+#include <chrono>
 void main() {
 
-	char *arquivo = "matrix_exemplo_15.txt";
+	char *arquivo = "esparsa_verdade.txt";
 	ifstream instancia(arquivo, ifstream::in);
 	int n, tau;
 	instancia >> n >> tau;
@@ -11,14 +11,19 @@ void main() {
 	vector<arco> G = ler_instancia(arquivo);
 
 
-	imprimir_matriz(G, n);
+	//imprimir_matriz(G, n);
 
 	cout << endl << endl;
 
-	imprimir_matriz(Reversed_Cuthill_Mckee(G, n), n);
+	auto TEMPO_COMECO = chrono::high_resolution_clock::now();
+	chrono::duration<double> elapsed;
+	G = Reversed_Cuthill_Mckee(G, n);
+	auto  TEMPO_FIM = chrono::high_resolution_clock::now();
+	elapsed = TEMPO_FIM - TEMPO_COMECO;
+	cout << "Tempo em segundos: " << elapsed.count() << endl;
 
-
-	vector<int> v = { 3,1,2,2,1,3,2,2,1 };
+	//imprimir_matriz(G, n);
+	imprimir_matriz_txt(G, n);
 
 	cout << endl;
 
