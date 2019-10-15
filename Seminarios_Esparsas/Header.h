@@ -35,10 +35,16 @@ struct vertice{
 	bool visitado;
 	int particao;
 	vector<int> adj;
+	vector<int> ordem;
 
 	bool operator <(const vertice d) {
 		return this->grau < d.grau;
 	}
+
+	bool operator >=(const vertice d) {
+		return this->grau >= d.grau;
+	}
+
 
 	bool operator ==(const vertice d) {
 		return this->grau == d.grau;
@@ -59,6 +65,9 @@ struct vertice{
 void countSort(vector<vertice> &array, int max);
 list<list<arco>> REFINED_QUOCIENT_TREES(vector<vertice> V_ord_por_nivel, vector<vertice> V_ordenado_por_label);
 list<vertice> SPAN(vector<vertice> Vertices, int v_label);
+vector<int> countSort_grau(vector<int> graus);
+
+void insertion_sort_m(vector<vertice> &P);
 
 vector<arco> ler_instancia(const char * filename) {
 	ifstream instancia(filename, ifstream::in);
@@ -151,7 +160,7 @@ vector<arco> Reversed_Cuthill_Mckee(vector<arco> G, int n) {
 		adj[G[i].i].push_back(G[i].j);
 		adj[G[i].j].push_back(G[i].i);
 	}
-
+	//vector<int> ordem_por_grau = countSort_grau(Graus); //O(n + (n - 1)) = O(n) 
 
 
 	//jogar dados na estrutura de vértice
@@ -160,7 +169,8 @@ vector<arco> Reversed_Cuthill_Mckee(vector<arco> G, int n) {
 		Vert[i] = vertice(i, Graus[i]);
 		Vert[i].adj = adj[i];
 		Vert[i].particao = -1;
-	}
+	}	
+
 
 	//para cada vértice adicionar adjacentes por ordem de grau
 
@@ -192,7 +202,7 @@ vector<arco> Reversed_Cuthill_Mckee(vector<arco> G, int n) {
 				n_particoes = Vert[filho].particao + 1; // guardar o número de particoes no momento;
 			}
 		}
-		sort(aux.begin(), aux.end());
+		insertion_sort_m(aux);
 		for (auto a : aux) {
 			permutacao[itp] = a.label;
 			itp++;
@@ -223,7 +233,7 @@ vector<arco> Reversed_Cuthill_Mckee(vector<arco> G, int n) {
 	vector<vertice> Vert_ord = Vert;
 	countSort(Vert_ord, n_particoes);
 
-	REFINED_QUOCIENT_TREES(Vert_ord, Vert);
+	//REFINED_QUOCIENT_TREES(Vert_ord, Vert);
 
 	return G_new;
 }
@@ -343,8 +353,12 @@ Step_0:
 }
 
 
-void insertion_sort_m(vector<int> P) {
+void insertion_sort_m(vector<vertice> &P) {
+	if (P.size() == 0)
+		return;
+
 	int N = P.size();
+	P.push_back(vertice());
 	vector<int> B(N, 0);
 
 	B[N-1] = 0;
@@ -358,7 +372,7 @@ void insertion_sort_m(vector<int> P) {
 				B[k] = B[k + 1] + 1;
 				continue;
 			}
-			int temp = P[k];
+			vertice temp = P[k];
 			
 			int l = k + 1;
 			
@@ -384,8 +398,8 @@ void insertion_sort_m(vector<int> P) {
 
 		}
 	}
-	cout << endl;
 
+	P.pop_back();
 }
 
 void countSort(vector<vertice> &array, int max) {
@@ -407,6 +421,33 @@ void countSort(vector<vertice> &array, int max) {
 	for (int i = 0; i < n; i++) {
 		array[i] = output[i + 1]; //store output array to main array
 	}
+}
+
+
+vector<int> countSort_grau(vector<int> graus) {
+	
+	int n = graus.size();
+	int max = n - 1;
+	vector<int> output(n + 1);
+
+	vector<int> count(max + 1, 0);     //create count array (max+1 number of elements)
+
+	for (int i = 0; i < n; i++)
+		count[graus[i]]++;     //contar frequencia
+
+	for (int i = 1; i <= max; i++)
+		count[i] += count[i - 1];     //contar frequencia acumulada
+
+	for (int i = n - 1; i >= 0; i--) {
+		output[count[graus[i]]] = i;
+		count[graus[i]] -= 1; //atualizar vetor e decrescer frequencia
+	}
+	vector<int> saida(n);
+	for (int i = 0; i < n; i++){
+		saida[i] = output[i + 1];
+	}
+	
+	return saida;
 }
 
 

@@ -2,7 +2,7 @@
 
 void main() {
 
-	char *arquivo = "matriz_trees.txt";
+	char *arquivo = "matrix_exemplo_15.txt";
 	ifstream instancia(arquivo, ifstream::in);
 	int n, tau;
 	instancia >> n >> tau;
@@ -17,6 +17,8 @@ void main() {
 
 	imprimir_matriz(Reversed_Cuthill_Mckee(G, n), n);
 
+
+	vector<int> v = { 3,1,2,2,1,3,2,2,1 };
 
 	cout << endl;
 
