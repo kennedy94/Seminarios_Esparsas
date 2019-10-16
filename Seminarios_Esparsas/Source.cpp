@@ -1,8 +1,8 @@
 #include "Header.h"
 #include <chrono>
-void main() {
+main(int argc, char *argv[]) {
 
-	char *arquivo = "matrix_exemplo_10.txt";
+	const char *arquivo = argv[1];
 	ifstream instancia(arquivo, ifstream::in);
 	int n, tau;
 	instancia >> n >> tau;
@@ -26,5 +26,4 @@ void main() {
 	//imprimir_matriz_txt(G, n);
 
 	cout << endl;
-
 }
