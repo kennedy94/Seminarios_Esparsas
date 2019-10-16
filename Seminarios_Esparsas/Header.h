@@ -225,9 +225,10 @@ vector<arco> Reversed_Cuthill_Mckee(vector<arco> G, int n) {
 
 	//invertendo a ordem
 	vector<int> y(n, 0);
-	for (int i = 0; i < n; i++)
-		y[i] = permutacao[n - 1 - i];
-
+	for (int i = 0; i < n; i++) {
+		//y[i] = permutacao[n - 1 - i];
+		y[i] = permutacao[i];
+	}
 	//for (int i = 0; i < n; i++){
 	//	Vert[i].particao = n_particoes - 1 - Vert[i].particao;
 	//}

@@ -1,6 +1,6 @@
 #include "Header.h"
 #include <chrono>
-main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
 
 	const char *arquivo = argv[1];
 	ifstream instancia(arquivo, ifstream::in);
@@ -25,5 +25,5 @@ main(int argc, char *argv[]) {
 	imprimir_matriz(G, n);
 	//imprimir_matriz_txt(G, n);
 
-	cout << endl;
+	return 0;
 }
