@@ -379,19 +379,6 @@ void insertion_sort_m(vector<vertice> &P) {
 	B[N-1] = 0;
 
 	for (int k = N-2; k >= 0; k--){
-		cout << "P = ";
-		for (int i = 0; i < P.size(); i++){
-			cout << P[i].grau << " ";
-		}
-		cout << endl;
-
-		cout << "P = ";
-		for (int i = 0; i < B.size(); i++) {
-			cout << B[i] << " ";
-		}
-		cout << endl << endl;
-
-
 		if (P[k] < P[k+1]){
 			B[k] = 0;
 		}
@@ -512,4 +499,93 @@ void imprimir_matriz_txt(vector<arco> G, int n) {
 		saida << i << " " << i << " " << 1 << endl;
 
 	saida.close();
+}
+
+
+
+void insertion_sort_m(vector<int> &P) {
+	if (P.size() == 0)
+		return;
+
+	int N = P.size();
+	P.push_back(-1);
+
+	vector<int> B(P.size(), 0);
+
+	B[N - 1] = 0;
+
+	cout << "P = ";
+	for (int i = 0; i < P.size(); i++) {
+		cout << P[i] << " ";
+	}
+	cout << endl;
+
+	cout << "B = ";
+	for (int i = 0; i < B.size(); i++) {
+		cout << B[i] << " ";
+	}
+	cout << endl << endl;
+
+	for (int k = N - 2; k >= 0; k--) {
+		
+		cout << "P = ";
+		for (int i = 0; i < P.size(); i++) {
+			cout << P[i] << " ";
+		}
+		cout << endl;
+
+		cout << "B = ";
+		for (int i = 0; i < B.size(); i++) {
+			cout << B[i] << " ";
+		}
+		cout << endl << endl;
+
+		if (P[k] < P[k + 1]) {
+			B[k] = 0;
+		}
+		else {
+			if (P[k] == P[k + 1]) {
+				B[k] = B[k + 1] + 1;
+				continue;
+			}
+			else {
+				int temp = P[k];
+
+				int l = k + 1;
+
+				while (true) {
+					P[l - 1] = P[l + B[l]];
+					B[l - 1] = B[l];
+
+					l += B[l] + 1;
+
+					if (l > N - 1 || P[l] >= temp) {
+						P[l - 1] = temp;
+						if (P[l] == temp) {
+							B[l - 1] = B[l] + 1;
+						}
+						else {
+							B[l - 1] = 0;
+						}
+						break;
+					}
+				}
+			}
+		}
+
+		
+	}
+
+	cout << "P = ";
+	for (int i = 0; i < P.size(); i++) {
+		cout << P[i] << " ";
+	}
+	cout << endl;
+
+	cout << "B = ";
+	for (int i = 0; i < B.size(); i++) {
+		cout << B[i] << " ";
+	}
+	cout << endl << endl;
+	P.pop_back();
 }

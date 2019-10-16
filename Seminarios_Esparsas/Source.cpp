@@ -25,5 +25,8 @@ int main(int argc, char *argv[]) {
 	imprimir_matriz(G, n);
 	//imprimir_matriz_txt(G, n);
 
+	/*vector<int> v = { 3,1,2,2,1,3,2,2 };
+	insertion_sort_m(v);*/
+
 	return 0;
 }
