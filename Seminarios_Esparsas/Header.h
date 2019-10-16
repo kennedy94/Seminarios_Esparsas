@@ -379,6 +379,19 @@ void insertion_sort_m(vector<vertice> &P) {
 	B[N-1] = 0;
 
 	for (int k = N-2; k >= 0; k--){
+		cout << "P = ";
+		for (int i = 0; i < P.size(); i++){
+			cout << P[i].grau << " ";
+		}
+		cout << endl;
+
+		cout << "P = ";
+		for (int i = 0; i < B.size(); i++) {
+			cout << B[i] << " ";
+		}
+		cout << endl << endl;
+
+
 		if (P[k] < P[k+1]){
 			B[k] = 0;
 		}
