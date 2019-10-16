@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <numeric>
 #include <fstream>
-#include <list>>
+#include <list>
 #include <stack>
 using namespace std;
 
