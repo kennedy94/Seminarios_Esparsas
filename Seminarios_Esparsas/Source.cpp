@@ -2,16 +2,16 @@
 #include <chrono>
 void main() {
 
-	char *arquivo = "esparsa_verdade.txt";
+	char *arquivo = "matrix_exemplo_10.txt";
 	ifstream instancia(arquivo, ifstream::in);
 	int n, tau;
 	instancia >> n >> tau;
 	instancia.close();
 
 	vector<arco> G = ler_instancia(arquivo);
+	//imprimir_matriz_txt(G, n);
 
-
-	//imprimir_matriz(G, n);
+	imprimir_matriz(G, n);
 
 	cout << endl << endl;
 
@@ -22,8 +22,8 @@ void main() {
 	elapsed = TEMPO_FIM - TEMPO_COMECO;
 	cout << "Tempo em segundos: " << elapsed.count() << endl;
 
-	//imprimir_matriz(G, n);
-	imprimir_matriz_txt(G, n);
+	imprimir_matriz(G, n);
+	//imprimir_matriz_txt(G, n);
 
 	cout << endl;
 

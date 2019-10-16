@@ -190,6 +190,20 @@ vector<arco> Reversed_Cuthill_Mckee(vector<arco> G, int n) {
 	int n_particoes;
 
 	for (int i = 0; i < n; i++){
+		//Caso desconexo, se há vértice não visitado pegue o não visitado com menor grau
+		if (permutacao[i] == -1) {
+			int minimo_i = 0;
+			for (int i2 = 1; i2 < n; i2++) {
+				if (!Vert[i2].visitado && Vert[i2] < Vert[minimo_i])
+					minimo_i = i2;
+			}
+
+			Vert[minimo_i].visitado = true;
+			Vert[minimo_i].particao = Vert[permutacao[i - 1]].particao + 1;
+			itp++;
+			n_particoes = Vert[minimo_i].particao + 1;
+			permutacao[i] = Vert[minimo_i].label;
+		}
 		//percorrer seus filhos e adicioná-los em ordem de grau caso não tenham sido visitados
 		for (auto filho: Vert[permutacao[i]].adj) {
 			//se for filho e ainda não foi visitado
