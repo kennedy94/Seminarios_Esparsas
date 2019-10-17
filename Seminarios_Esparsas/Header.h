@@ -9,28 +9,15 @@
 #include <list>
 #include <stack>
 using namespace std;
+struct vertice;	//estrutura auxiliar para facilitar o acesso dos vértices por grau e marcá-los como visitados
+struct arco;	//estrutura para guardar um arco de um grafo
+void countSort(vector<vertice> &array, int max);
+list<list<arco>> REFINED_QUOCIENT_TREES(vector<vertice> V_ord_por_nivel, vector<vertice> V_ordenado_por_label);
+list<vertice> SPAN(vector<vertice> Vertices, int v_label);
+vector<int> countSort_grau(vector<int> graus);
 
-//estrutura para guardar um arco de um grafo
-struct arco {
-	//dados do arco
-	int i, j;
-	float v;
-	//construtor do arco
-	arco(int i1, int i2, float i3) {
-		i = i1;
-		j = i2;
-		v = i3;
-	}
 
-	arco() {
-		i = -1;
-		j = -1;
-		v = 0.0;
-	}
-
-};
-//estrutura auxiliar para facilitar o acesso dos vértices por grau e marcá-los como visitados
-struct vertice{
+struct vertice {
 	int label, grau;
 	bool visitado;
 	int particao;
@@ -62,10 +49,24 @@ struct vertice{
 	}
 };
 
-void countSort(vector<vertice> &array, int max);
-list<list<arco>> REFINED_QUOCIENT_TREES(vector<vertice> V_ord_por_nivel, vector<vertice> V_ordenado_por_label);
-list<vertice> SPAN(vector<vertice> Vertices, int v_label);
-vector<int> countSort_grau(vector<int> graus);
+struct arco {
+	//dados do arco
+	int i, j;
+	float v;
+	//construtor do arco
+	arco(int i1, int i2, float i3) {
+		i = i1;
+		j = i2;
+		v = i3;
+	}
+
+	arco() {
+		i = -1;
+		j = -1;
+		v = 0.0;
+	}
+
+};
 
 void insertion_sort_m(vector<vertice> &P);
 
@@ -247,7 +248,7 @@ vector<arco> Reversed_Cuthill_Mckee(vector<arco> G, int n) {
 	vector<vertice> Vert_ord = Vert;
 	countSort(Vert_ord, n_particoes);
 
-	//REFINED_QUOCIENT_TREES(Vert_ord, Vert);
+	REFINED_QUOCIENT_TREES(Vert_ord, Vert);
 
 	return G_new;
 }
@@ -289,9 +290,14 @@ Step_0:
 	list<vertice> S;
 	S.push_back(y);
 
+	vector<bool> selecionado(V_ordenado_por_label.size(), false);
+	
+	selecionado[y.label] = true;
+
+
 	while (k >= 0){
 		//Step 1
-		while (pilha.size() != 0 && pilha.top().particao == k) {
+		while (pilha.size() != 0 && pilha.top().particao == k && !selecionado[pilha.top().label]) {
 			S.push_back(pilha.top());
 			pilha.pop();
 		}
@@ -300,16 +306,17 @@ Step_0:
 		//Step 2
 		list<vertice> Y;
 		queue<vertice> fila;
-		vector<bool> visitado(V_ordenado_por_label.size(), false);
+		vector<bool> visitado_aux(V_ordenado_por_label.size(), false);
+		//Determinar Span(Y) 
 		for (auto it : S) {
-			if (!visitado[it.label]) {
+			if (!visitado_aux[it.label]) {
 				fila.push(it);
-				visitado[it.label] = true;
+				visitado_aux[it.label] = true;
 			}
 			for (auto adj : it.adj) {
-				if (V_ordenado_por_label[adj].particao == k && !visitado[V_ordenado_por_label[adj].label]){
+				if (V_ordenado_por_label[adj].particao == k && !visitado_aux[V_ordenado_por_label[adj].label]){
 					fila.push(V_ordenado_por_label[adj]);
-					visitado[V_ordenado_por_label[adj].label] = true;
+					visitado_aux[V_ordenado_por_label[adj].label] = true;
 				}
 			}
 		}
@@ -317,38 +324,42 @@ Step_0:
 		while (fila.size() != 0){
 			vertice aux = fila.front();
 			Y.push_back(aux);
-			visitado[aux.label] = true;
 			fila.pop();
 
 			for (auto adj : aux.adj) {
-				if (V_ordenado_por_label[adj].particao == k && !visitado[V_ordenado_por_label[adj].label]) {
+				if (V_ordenado_por_label[adj].particao == k && !visitado_aux[V_ordenado_por_label[adj].label]) {
 					fila.push(V_ordenado_por_label[adj]);
-					visitado[V_ordenado_por_label[adj].label] = true;
+					visitado_aux[V_ordenado_por_label[adj].label] = true;
 				}
 			}		
 		}
 
 		//Determinar Adj(Y) intersecao L_{k+1}
 		list<vertice> Conj_inter;
+		for (auto &aux_it : visitado_aux)
+			aux_it = false;
 		for (auto it : Y) {
 			for (auto adj : it.adj) {
-				if (V_ordenado_por_label[adj].particao == k + 1 && !visitado[V_ordenado_por_label[adj].label]) {
-					fila.push(V_ordenado_por_label[adj]);
-					visitado[V_ordenado_por_label[adj].label] = true;
+				if (V_ordenado_por_label[adj].particao == k + 1 && !selecionado[V_ordenado_por_label[adj].label] && !visitado_aux[V_ordenado_por_label[adj].label]) {
+					Conj_inter.push_back(V_ordenado_por_label[adj]);
+					visitado_aux[V_ordenado_por_label[adj].label] = true;
 				}
 			}
 		}
 
-		if (Conj_inter.size() == 0){
+		if (Conj_inter.size() == 0) {
 			//falta if
 			//Step 3
 			Particao_final.push_back(Y);
 			S.clear();
 			//Step 4
 			for (auto ver : Y) {
+				selecionado[ver.label] = true;
 				for (auto adj : ver.adj) {
-					if (V_ordenado_por_label[adj].particao == k - 1)
+					if (V_ordenado_por_label[adj].particao == k - 1 & !visitado_aux[adj]) {
 						S.push_back(V_ordenado_por_label[adj]);
+						visitado_aux[adj] = true;
+					}
 				}
 			}
 			Y.clear();
@@ -356,16 +367,43 @@ Step_0:
 		}
 		else {
 			//Step 5
+
+			//empilha S na pilha
 			for (auto s : S) {
 				pilha.push(s);
 			}
+			//pegar vertice qualquer adj(Y) do nivel k + 1
+			vertice y_k1;
+			for (auto ver : Y) {
+				for (auto adj : ver.adj) {
+					if (V_ordenado_por_label[adj].particao == k + 1 && !selecionado[adj]) {
+						y_k1 = V_ordenado_por_label[adj];
+						break;
+					}
+				}
+			}
+
+			//traçar caminho
+			int t = 0, T = 1;
+			while (k + t + 1 < Particao.size()){
+				t++;
+				vertice y_k1_aux = y_k1;
+				for (auto filho : y_k1_aux.adj) {
+					if (V_ordenado_por_label[filho].particao == k + t && !visitado_aux[V_ordenado_por_label[filho].label]) {
+						y_k1 = V_ordenado_por_label[filho];
+						T = t;
+					}
+				}
+			}
+			S.clear();
+			S.push_back(y_k1);
+			k += T;
 		}
 		
 	}
 
 	return list<list<arco>>();
 }
-
 
 void insertion_sort_m(vector<vertice> &P) {
 	if (P.size() == 0)
@@ -500,8 +538,6 @@ void imprimir_matriz_txt(vector<arco> G, int n) {
 
 	saida.close();
 }
-
-
 
 void insertion_sort_m(vector<int> &P) {
 	if (P.size() == 0)
