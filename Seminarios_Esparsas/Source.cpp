@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
 	instancia.close();
 
 	vector<arco> G = ler_instancia(arquivo);
-	//imprimir_matriz_txt(G, n);
+	/*imprimir_matriz_txt(G, n);*/
 
 	imprimir_matriz(G, n);
 
@@ -23,6 +23,7 @@ int main(int argc, char *argv[]) {
 	cout << "Tempo em segundos: " << elapsed.count() << endl;
 
 	imprimir_matriz(G, n);
+
 	//imprimir_matriz_txt(G, n);
 
 	/*vector<int> v = { 3,1,2,2,1,3,2,2 };

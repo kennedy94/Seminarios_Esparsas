@@ -227,8 +227,8 @@ vector<arco> Reversed_Cuthill_Mckee(vector<arco> G, int n) {
 	//invertendo a ordem
 	vector<int> y(n, 0);
 	for (int i = 0; i < n; i++) {
-		//y[i] = permutacao[n - 1 - i];
-		y[i] = permutacao[i];
+		y[i] = permutacao[n - 1 - i];
+		//y[i] = permutacao[i];
 	}
 	//for (int i = 0; i < n; i++){
 	//	Vert[i].particao = n_particoes - 1 - Vert[i].particao;
@@ -240,9 +240,17 @@ vector<arco> Reversed_Cuthill_Mckee(vector<arco> G, int n) {
 		transformar[y[i]] = i;
 
 	vector<arco> G_new(G.size());
-	for (int i = 0; i < G.size(); i++)
+	for (int i = 0; i < G.size(); i++) 
 		G_new[i] = arco(transformar[G[i].i], transformar[G[i].j], G[i].v);
 
+	//vector<int> Particoes_t(n,0);
+	//for (int i = 0; i < n; i++){
+	//	Particoes_t[i] = Vert[transformar[i]].particao;
+	//}
+
+	//for (int i = 0; i < n; i++) {
+	//	Vert[i].particao = Particoes_t[i];
+	//}
 
 	//Árvore Quociente Refinada
 	vector<vertice> Vert_ord = Vert;
@@ -356,7 +364,7 @@ Step_0:
 			for (auto ver : Y) {
 				selecionado[ver.label] = true;
 				for (auto adj : ver.adj) {
-					if (V_ordenado_por_label[adj].particao == k - 1 & !visitado_aux[adj]) {
+					if (V_ordenado_por_label[adj].particao == k - 1 & !selecionado[adj]) {
 						S.push_back(V_ordenado_por_label[adj]);
 						visitado_aux[adj] = true;
 					}
@@ -389,7 +397,7 @@ Step_0:
 				t++;
 				vertice y_k1_aux = y_k1;
 				for (auto filho : y_k1_aux.adj) {
-					if (V_ordenado_por_label[filho].particao == k + t && !visitado_aux[V_ordenado_por_label[filho].label]) {
+					if (V_ordenado_por_label[filho].particao == k + t && !visitado_aux[V_ordenado_por_label[filho].label] && !selecionado[V_ordenado_por_label[filho].label]) {
 						y_k1 = V_ordenado_por_label[filho];
 						T = t;
 					}
@@ -532,9 +540,9 @@ void imprimir_matriz_txt(vector<arco> G, int n) {
 
 	saida << n << " " << G.size() << endl;
 	for (auto a : G) 
-		saida << a.i+1 << " " << a.j+1 << " " << 1 << endl;
-	for (int i = 1; i <= n; i++)
-		saida << i << " " << i << " " << 1 << endl;
+		saida << a.i-1 << " " << a.j-1 << " " << 1 << endl;
+	//for (int i = 1; i <= n; i++)
+	//	saida << i << " " << i << " " << 1 << endl;
 
 	saida.close();
 }
