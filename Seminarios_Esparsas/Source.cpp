@@ -11,13 +11,16 @@ int main(int argc, char *argv[]) {
 	vector<arco> G = ler_instancia(arquivo);
 	/*imprimir_matriz_txt(G, n);*/
 
+	ORDENACAO_RQV(G, n);
+
+
 	imprimir_matriz(G, n);
 
 	cout << endl << endl;
 
 	auto TEMPO_COMECO = chrono::high_resolution_clock::now();
 	chrono::duration<double> elapsed;
-	G = Reversed_Cuthill_Mckee(G, n);
+	G = transformar_grafo(Reversed_Cuthill_Mckee(G, n), G);
 	auto  TEMPO_FIM = chrono::high_resolution_clock::now();
 	elapsed = TEMPO_FIM - TEMPO_COMECO;
 	cout << "Tempo em segundos: " << elapsed.count() << endl;
