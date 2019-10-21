@@ -160,6 +160,10 @@ vector<arco> transformar_grafo(vector<int> permutacao, vector<arco> G) {
 }
 
 vector<int> Reversed_Cuthill_Mckee(vector<arco> G, int n) {
+
+	if (G.size() == 0)
+		return vector<int>(n, -1);
+
 	//declarar vetor auxiliar de graus e conjuntos de adjacência
 	vector<int> Graus(n, 0);
 	vector<vector<int>> adj(n);
@@ -237,10 +241,82 @@ vector<int> Reversed_Cuthill_Mckee(vector<arco> G, int n) {
 	}
 
 	//invertendo a ordem
-	vector<int> y(n, 0);
+	vector<int> y(n, -1);
 	for (int i = 0; i < n; i++) {
 		y[i] = permutacao[n - 1 - i];
 		//y[i] = permutacao[i];
+	}
+
+	return y;
+}
+
+
+vector<int> Reversed_Cuthill_Mckee_Modificado(vector<vertice> Vert) {
+	int n = Vert.size();
+	if (n == 0)
+		return vector<int>();
+
+	//Nó inicial
+	vector<int> permutacao(n, -1);
+	vertice &min = *min_element(Vert.begin(), Vert.end());
+	min.visitado = true;
+	min.particao++; // Pertence a particao S0
+	int itp = 0;
+	permutacao[itp] = min.label;
+	itp++;
+
+	vector<vertice> aux;
+
+	//apenas caso conexo
+	for (int i = 0; i < n; i++) {
+		if (permutacao[i] == -1) {
+			int minimo_i = 0;
+			for (int i2 = 1; i2 < n; i2++) {
+				if (!Vert[i2].visitado && Vert[i2] < Vert[minimo_i])
+					minimo_i = i2;
+			}
+
+			Vert[minimo_i].visitado = true;
+			itp++;
+			permutacao[i] = Vert[minimo_i].label;
+		}
+		//percorrer seus filhos e adicioná-los em ordem de grau caso não tenham sido visitados
+		int f;
+		for (int v = 0; v < n; v++) {
+			if (Vert[v].label == permutacao[i]) {
+				f = v; break;
+			}
+		}
+
+
+		for (auto filho : Vert[f].adj) {
+			//se for filho e ainda não foi visitado e faz parte do conjunto
+			int filho_i;
+			bool in_Vert = false;
+			for (int v = 0; v < n; v++) {
+				if (Vert[v].label == filho) {
+					filho_i = v; in_Vert = true; break;
+				}
+			}
+			if (in_Vert) {
+				if (!Vert[filho_i].visitado) {
+					aux.push_back(Vert[filho_i]);
+					Vert[filho_i].visitado = true;
+				}
+			}
+		}
+		insertion_sort_m(aux);
+		for (auto a : aux) {
+			permutacao[itp] = a.label;
+			itp++;
+		}
+		aux.clear();
+	}
+
+	//invertendo a ordem
+	vector<int> y(n, -1);
+	for (int i = 0; i < n; i++) {
+		y[i] = permutacao[n - 1 - i];
 	}
 
 	return y;
@@ -272,7 +348,8 @@ void insertion_sort_m(vector<vertice> &P) {
 				int l = k + 1;
 
 				while(true) {
-					P[l - 1] = P[l + B[l]];
+		
+			P[l - 1] = P[l + B[l]];
 					B[l - 1] = B[l];
 
 					l += B[l] + 1;
@@ -503,15 +580,19 @@ list<list<vertice>> estrutura_de_nivel(vector<vertice> Vertices, int r) {
 					temp2.push_back(v);
 					v.visitado = true;
 					v.particao = particao;
+					ni++;
 				}
 			}
 				
 		}
 
+
 		particao++;
 		P.push_back(temp2);
 		temp = temp2;
 		temp2.clear();
+		
+		
 	}
 
 	return P;
@@ -689,7 +770,6 @@ Step_0:
 		}
 
 		if (Conj_inter.size() == 0) {
-			//falta if
 			//Step 3
 			Particao_final.push_back(Y);
 			S.clear();
@@ -746,7 +826,7 @@ Step_0:
 	return Particao_final;
 }
 
-vector<arco> ORDENACAO_RQV(vector<arco> G, int n) {
+vector<int> ORDENACAO_RQV(vector<arco> G, int n) {
 	vector<int> Graus(n, 0);
 	vector<vector<int>> adj(n);
 
@@ -763,14 +843,13 @@ vector<arco> ORDENACAO_RQV(vector<arco> G, int n) {
 		Vertices[i].particao = -1;
 	}
 
-
-	vertice_pseudoperiferico(Vertices, 0);
+	int vp = vertice_pseudoperiferico(Vertices, 0);
 
 Step_0:
 	stack<vertice> pilha;
 	list<list<vertice>> Particao, Particao_final;
 
-	Particao = estrutura_de_nivel(Vertices, 0);
+	Particao = estrutura_de_nivel(Vertices, vp);
 	int p = 0;
 	for (auto l: Particao){
 		for (auto v:l){
@@ -792,12 +871,20 @@ Step_0:
 	vector<bool> selecionado(Vertices.size(), false);
 
 	selecionado[y.label] = true;
-
+	vector<int> permutacao(n, -1);
+	int i_per = 0;
 
 	while (k >= 0) {
 		//Step 1
 		while (pilha.size() != 0 && pilha.top().particao == k && !selecionado[pilha.top().label]) {
-			S.push_back(pilha.top());
+
+			bool in_S = false;
+			for (auto s :S){
+				if (s.label == pilha.top().label)
+					in_S = true;
+			}
+			if(!in_S)
+				S.push_back(pilha.top());
 			pilha.pop();
 		}
 
@@ -805,7 +892,7 @@ Step_0:
 		//Step 2
 		list<vertice> Y;
 		queue<vertice> fila;
-		vector<bool> visitado_aux(Vertices.size(), false);
+		vector<bool> visitado_aux(Vertices.size(), false); //vetor auxiliar para busca que gera o span
 		//Determinar Span(Y) 
 		for (auto it : S) {
 			if (!visitado_aux[it.label]) {
@@ -820,9 +907,22 @@ Step_0:
 			}
 		}
 
+		vector<vertice> GY_S;
 		while (fila.size() != 0) {
 			vertice aux = fila.front();
 			Y.push_back(aux);
+
+			//coloca no conjunto sem S só dps q percorreu todo o S na fila
+			bool in_S = false;
+			for (auto s : S) {
+				if (s.label == aux.label) {
+					in_S = true;
+					break;
+				}
+			}
+			if(!in_S)
+				GY_S.push_back(aux);
+
 			fila.pop();
 
 			for (auto adj : aux.adj) {
@@ -847,9 +947,23 @@ Step_0:
 		}
 
 		if (Conj_inter.size() == 0) {
-			//falta if
 			//Step 3
 			//Gerar grafo G(Y\S)
+
+			vector<int> temp = Reversed_Cuthill_Mckee_Modificado(GY_S);
+
+			//Numera GY_S com RCM
+			for (auto tempi : temp) {
+				permutacao[i_per] = tempi;
+				i_per++;
+			}
+			for (auto s : S) {
+				permutacao[i_per] = s.label;
+				i_per++;
+			}
+			
+
+			
 
 			Particao_final.push_back(Y);
 			S.clear();
@@ -857,7 +971,7 @@ Step_0:
 			for (auto ver : Y) {
 				selecionado[ver.label] = true;
 				for (auto adj : ver.adj) {
-					if (Vertices[adj].particao == k - 1 & !selecionado[adj]) {
+					if (Vertices[adj].particao == k - 1 && !selecionado[adj] && !visitado_aux[adj]) {
 						S.push_back(Vertices[adj]);
 						visitado_aux[adj] = true;
 					}
@@ -903,5 +1017,5 @@ Step_0:
 
 	}
 
-	return vector<arco>();
+	return permutacao;
 }
