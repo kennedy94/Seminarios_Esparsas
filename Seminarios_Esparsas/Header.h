@@ -8,6 +8,7 @@
 #include <fstream>
 #include <list>
 #include <stack>
+#include <climits>
 using namespace std;
 struct vertice;	//estrutura auxiliar para facilitar o acesso dos vértices por grau e marcá-los como visitados
 struct arco;	//estrutura para guardar um arco de um grafo
@@ -758,8 +759,8 @@ Step_0:
 
 		//Determinar Adj(Y) intersecao L_{k+1}
 		list<vertice> Conj_inter;
-		for (auto &aux_it : visitado_aux)
-			aux_it = false;
+		for (int it = 0; it < Vertices.size(); it++)
+			visitado_aux[it] = false;
 		for (auto it : Y) {
 			for (auto adj : it.adj) {
 				if (Vertices[adj].particao == k + 1 && !selecionado[Vertices[adj].label] && !visitado_aux[Vertices[adj].label]) {
@@ -935,8 +936,8 @@ Step_0:
 
 		//Determinar Adj(Y) intersecao L_{k+1}
 		list<vertice> Conj_inter;
-		for (auto &aux_it : visitado_aux)
-			aux_it = false;
+		for (int it = 0; it < Vertices.size(); it++)
+			visitado_aux[it] = false;
 		for (auto it : Y) {
 			for (auto adj : it.adj) {
 				if (Vertices[adj].particao == k + 1 && !selecionado[Vertices[adj].label] && !visitado_aux[Vertices[adj].label]) {
