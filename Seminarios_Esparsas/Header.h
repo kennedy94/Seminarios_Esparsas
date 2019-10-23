@@ -79,13 +79,13 @@ vector<arco> ler_instancia(const char * filename) {
 	int n, tau;
 	instancia >> n >> tau;
 
-	vector<arco> G(tau);
+	vector<arco> G;
 	for (int it = 0; it < tau; it++){
 		int i, j; float v;
 
 		instancia >> i >> j >> v;
-		if(i != j)
-			G[it] = arco(i, j, v);
+		if (i != j)
+			G.push_back(arco(i, j, v));
 	}
 	instancia.close();
 
@@ -447,11 +447,18 @@ list<vertice> SPAN(vector<vertice> Vertices, int v_label) {
 }
 
 void imprimir_matriz_txt(vector<arco> G, int n) {
-	ofstream saida("matriz_pos_CM.txt");
+	ofstream saida("matriz_matlab_trees.txt");
 
-	saida << n << " " << G.size() << endl;
-	for (auto a : G) 
-		saida << a.i-1 << " " << a.j-1 << " " << 1 << endl;
+	//saida << n << " " << G.size() << endl;
+	for (int i = 0; i < n; i++)	{
+		saida <<i + 1 << " " << i + 1 << " " << 1 << endl;
+	}
+
+
+	for (auto a : G) {
+		saida << a.i + 1 << " " << a.j + 1 << " " << 1 << endl;
+		saida << a.j + 1 << " " << a.i + 1 << " " << 1 << endl;
+	}
 	//for (int i = 1; i <= n; i++)
 	//	saida << i << " " << i << " " << 1 << endl;
 
@@ -951,6 +958,7 @@ Step_0:
 			//Step 3
 			//Gerar grafo G(Y\S)
 
+
 			vector<int> temp = Reversed_Cuthill_Mckee_Modificado(GY_S);
 
 			//Numera GY_S com RCM
@@ -958,10 +966,17 @@ Step_0:
 				permutacao[i_per] = tempi;
 				i_per++;
 			}
+
+			//Numera S com ordem arbitraria
 			for (auto s : S) {
 				permutacao[i_per] = s.label;
 				i_per++;
 			}
+
+			
+
+			
+
 			
 
 			
