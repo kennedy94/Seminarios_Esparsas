@@ -92,6 +92,29 @@ vector<arco> ler_instancia(const char * filename) {
 	return G;
 }
 
+vector<arco> ler_instancia_formato_dif(const char * filename) {
+	ifstream instancia(filename, ifstream::in);
+	if (instancia.fail()) {
+		cerr << "     Arquivo \"" << filename << "\" nao encontrado." << endl;
+		exit(0);
+	}
+	int n, tau;
+	instancia >> n >> tau;
+
+	vector<arco> G;
+	for (int it = 0; it < tau; it++) {
+		int i, j;
+
+		instancia >> i >> j;
+		if (i != j)
+			G.push_back(arco(i-1, j-1, 1));
+	}
+	instancia.close();
+
+	return G;
+}
+
+
 void imprimir_matriz(vector<arco> G, int n) {
 	vector < vector<bool>> MATRIZ(n);
 	for (int i = 0; i < n; i++)
@@ -867,6 +890,31 @@ Step_0:
 	}
 
 
+	vector<int> nivel(Vertices.size());
+	p = 0;
+	for (auto &l : Particao) {
+		for (auto &v : l) {
+			nivel[v.label] = p;
+		}
+		p++;
+	}
+
+	vector<int> Numeracao_por_Particao(Particao.size());
+
+	Numeracao_por_Particao[0] = Vertices.size() - Particao.front().size();
+
+	int iterador_p = 0,
+		soma = Numeracao_por_Particao[0];
+	for (auto p : Particao) {
+		soma += p.size();
+		if (iterador_p != 0 && iterador_p != Particao.size()) {
+			Numeracao_por_Particao[iterador_p] = Numeracao_por_Particao[iterador_p - 1] - p.size();
+		}
+		iterador_p++;
+	}
+
+
+
 	int k = Particao.size() - 1; //maior indice da particao
 
 	//transformar estrutura de níveis em uma lista de listas de vértices
@@ -958,26 +1006,18 @@ Step_0:
 			//Step 3
 			//Gerar grafo G(Y\S)
 
-
+			//Numera com RCM
 			vector<int> temp = Reversed_Cuthill_Mckee_Modificado(GY_S);
-
-			//Numera GY_S com RCM
 			for (auto tempi : temp) {
-				permutacao[i_per] = tempi;
-				i_per++;
+				permutacao[Numeracao_por_Particao[nivel[tempi]]] = tempi;
+				Numeracao_por_Particao[nivel[tempi]]++;
 			}
 
 			//Numera S com ordem arbitraria
 			for (auto s : S) {
-				permutacao[i_per] = s.label;
-				i_per++;
+				permutacao[Numeracao_por_Particao[nivel[s.label]]] = s.label;
+				Numeracao_por_Particao[nivel[s.label]]++;
 			}
-
-			
-
-			
-
-			
 
 			
 
@@ -1032,6 +1072,10 @@ Step_0:
 		}
 
 	}
+	//cout << endl;
+	//for (auto  perm: permutacao){
+	//	cout << perm << " ";
+	//}
 
 	return permutacao;
 }

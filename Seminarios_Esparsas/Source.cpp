@@ -9,9 +9,11 @@ int main(int argc, char *argv[]) {
 	instancia.close();
 
 	vector<arco> G = ler_instancia(arquivo);
+	//vector<arco> G = ler_instancia_formato_dif(arquivo);
+
 	cout << "Instancia lida!" << endl;
 	cout << "Matriz Original:" << endl;
-//	imprimir_matriz(G, n);
+	imprimir_matriz(G, n);
 	
 	
 	float soma_tempo = 0.0;
@@ -28,9 +30,9 @@ int main(int argc, char *argv[]) {
 	cout << "Média de tempo em segundos: " << soma_tempo/1 << endl;
 	
 	cout << "\n\nMatriz Reordenada:\n";
-//	imprimir_matriz(G, n);
+	imprimir_matriz(G, n);
 
-	imprimir_matriz_txt(G, n);
+	//imprimir_matriz_txt(G, n);
 
 
 	/*vector<int> v = { 3,1,2,2,1,3,2,2 };
