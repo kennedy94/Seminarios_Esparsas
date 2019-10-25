@@ -103,11 +103,11 @@ vector<arco> ler_instancia_formato_dif(const char * filename) {
 
 	vector<arco> G;
 	for (int it = 0; it < tau; it++) {
-		int i, j;
+		int i, j, v;
 
-		instancia >> i >> j;
+		instancia >> i >> j >> v;
 		if (i != j)
-			G.push_back(arco(i-1, j-1, 1));
+			G.push_back(arco(i-1, j-1, v));
 	}
 	instancia.close();
 
