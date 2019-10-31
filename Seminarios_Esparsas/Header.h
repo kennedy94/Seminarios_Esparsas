@@ -17,6 +17,10 @@ list<list<vertice>> REFINED_QUOCIENT_TREES(vector<arco> G, int n);
 list<vertice> SPAN(vector<vertice> Vertices, int v_label);
 vector<int> countSort_grau(vector<int> graus);
 
+vector<vertice> minimal_separator(vector<int> niveis, vector<vertice> Li);
+
+vector<vector<vertice>> connected_components(vector<bool> in_T, vector<vertice> V);
+
 struct vertice {
 	int label, grau;
 	bool visitado;
@@ -294,9 +298,9 @@ vector<int> Reversed_Cuthill_Mckee_Modificado(vector<vertice> Vert) {
 	//apenas caso conexo
 	for (int i = 0; i < n; i++) {
 		if (permutacao[i] == -1) {
-			int minimo_i = 0;
+			int minimo_i = 0, min = INT_MAX;
 			for (int i2 = 1; i2 < n; i2++) {
-				if (!Vert[i2].visitado && Vert[i2] < Vert[minimo_i])
+				if (!Vert[i2].visitado && Vert[i2].grau < min)
 					minimo_i = i2;
 			}
 
@@ -1078,4 +1082,193 @@ Step_0:
 	//}
 
 	return permutacao;
+}
+
+
+vector<int> ONE_WAY_DISSECTION(vector<arco> G, int n) {
+	vector<int> Graus(n, 0);
+	vector<vector<int>> adj(n);
+
+	//percorrer o grafo para atualizar graus e conjuntos de adjacência
+	for (int i = 0; i < G.size(); i++) {
+		Graus[G[i].i]++;	Graus[G[i].j]++;
+		if (find(adj[G[i].i].begin(), adj[G[i].i].end(), G[i].j) == adj[G[i].i].end())
+			adj[G[i].i].push_back(G[i].j);
+		if (find(adj[G[i].j].begin(), adj[G[i].j].end(), G[i].i) == adj[G[i].j].end())
+			adj[G[i].j].push_back(G[i].i);
+	}
+
+	vector<vertice> Vertices(n);
+	for (int i = 0; i < n; i++) {
+		Vertices[i] = vertice(i, Graus[i]);
+		Vertices[i].adj = adj[i];
+		Vertices[i].particao = -1;
+	}
+
+	Graus.clear();
+	for (auto &i : adj) {
+		i.clear();
+	}
+	adj.clear();
+
+STEP1:
+	//achar nó pseudoperiférico
+	int vp = vertice_pseudoperiferico(Vertices, 0);
+
+	//CRIAR ESTRUTURA DE NÍVEL
+	list<list<vertice>> Estrutura_Nivel;
+
+	Estrutura_Nivel = estrutura_de_nivel(Vertices, vp);
+	vector<vector<vertice>> L (Estrutura_Nivel.size());
+
+	int li = 0;
+	for (auto est : Estrutura_Nivel){
+		L[li] = vector<vertice>(est.begin(), est.end());
+		li++;
+	}
+
+	int p = 0;
+	for (auto l : L) {
+		for (auto v : l) {
+			Vertices[v.label].particao = p;
+		}
+		p++;
+	}
+
+	vector<int> niveis(Vertices.size());
+	p = 0;
+	for (auto &l : L) {
+		for (auto &v : l) {
+			niveis[v.label] = p;
+		}
+		p++;
+	}
+
+	int l = L.size();
+
+	float m, alpha, alphat, delta;
+
+	int k;
+
+	vector<vertice> X;
+	vector<vector<vertice>> Y;
+	vector<vertice> G_;
+	vector<vector<vertice>> T;
+	vector<bool> in_T(n, false);
+
+STEP2:
+	m = (float)n / (l + 1);
+	if (m <= sqrt(6 * l))
+		goto STEP5;
+	else {
+		alphat = l* sqrt(2.0 / 3 * (m + 1)) - 1;
+
+	}
+STEP3:
+	delta = l / (alphat + 1.0);
+	if (delta >= 2)
+		goto STEP6;
+
+STEP4:
+	alphat--;
+	if (alphat > 1)
+		goto STEP3;
+	else
+		goto STEP5;
+
+STEP5:
+	
+	Y.push_back(Vertices);
+	k = Y.size();
+	alpha = 0;
+	goto STEP8;
+
+STEP6:
+	alpha = floor(alphat);
+
+	for (int i = 0; i < alpha; i++){
+		int j = floor( (float)(i+1) * delta - 1);
+		T.push_back(minimal_separator(niveis, L[j]));
+		for(auto t: T.back()){
+			in_T[t.label] = true;
+		}
+
+	}
+
+STEP7:
+
+	Y = connected_components(in_T, Vertices);
+	k = Y.size();
+	for (auto j: T){
+		Y.push_back(j);
+	}
+
+STEP8:
+	vector<int> permutacao(n, -1);
+	int it = 0;
+	for (int i = 0; i < k; i++) {
+		vector<int> permut = Reversed_Cuthill_Mckee_Modificado(Y[i]);
+		for (int ii = 0; ii < permut.size(); ii++){
+			permutacao[it] = permut[ii];
+			it++;
+		}
+	}
+	for (int j = 0; j < alpha; j++){
+		for (int jj = 0; jj < Y[k+j].size(); jj++) {
+			permutacao[it] = Y[k + j][jj].label;
+			it++;
+		}
+	}
+
+	return permutacao;
+}
+
+vector<vertice> minimal_separator(vector<int> niveis, vector<vertice> Li) {
+	vector<vertice> retorno;
+
+	vector<bool> escolhido(niveis.size(), false);
+
+	for (auto i : Li){
+		for (auto f : i.adj)
+			if (niveis[f] == niveis[i.label] + 1 && !escolhido[i.label]) {
+				retorno.push_back(i);
+				escolhido[i.label] = true;
+			}
+	}
+
+	return retorno;
+}
+
+
+vector<vector<vertice>> connected_components(vector<bool> in_T, vector<vertice> V) {
+	vector<vector<vertice>> retorno;
+	vector<vertice> auxiliar;
+	vector<bool> visitado(in_T.size(), false);
+	queue<vertice> fila;
+
+
+	for (int i = 0; i < V.size(); i++){
+		if (!visitado[i] && !in_T[i]) {
+
+			fila.push(V[i]);
+			visitado[V[i].label] = true;
+
+			while (!fila.empty()) {
+				for (auto adj : fila.front().adj) {
+					if (!visitado[adj] && !in_T[adj]) {
+						fila.push(V[adj]);
+						visitado[V[adj].label] = true;
+					}
+				}
+				auxiliar.push_back(fila.front());
+				fila.pop();
+			}
+			retorno.push_back(auxiliar);
+			auxiliar.clear();
+		}
+	}
+
+
+
+	return retorno;
 }
