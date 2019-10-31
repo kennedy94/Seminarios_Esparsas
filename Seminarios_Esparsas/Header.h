@@ -1111,7 +1111,7 @@ vector<int> ONE_WAY_DISSECTION(vector<arco> G, int n) {
 	}
 	adj.clear();
 
-STEP1:
+//STEP1:
 	//achar nó pseudoperiférico
 	int vp = vertice_pseudoperiferico(Vertices, 0);
 
@@ -1156,54 +1156,53 @@ STEP1:
 	vector<vector<vertice>> T;
 	vector<bool> in_T(n, false);
 
-STEP2:
+//STEP2:
 	m = (float)n / (l + 1);
-	if (m <= sqrt(6 * l))
-		goto STEP5;
-	else {
+	bool pula = false;
+	if (m > sqrt(6 * l)){
 		alphat = l* sqrt(2.0 / 3 * (m + 1)) - 1;
 
+		do
+		{
+//STEP3:
+			delta = l / (alphat + 1.0);
+			if (delta >= 2) {
+				pula = true;
+				break;
+			}
+//STEP4:
+			alphat--;
+		} while (alphat > 1);
 	}
-STEP3:
-	delta = l / (alphat + 1.0);
-	if (delta >= 2)
-		goto STEP6;
+	if (!pula) {
+//STEP5:
+		Y.push_back(Vertices);
+		k = Y.size();
+		alpha = 0;
+	}
+	else {
+//STEP6:
+		alpha = floor(alphat);
 
-STEP4:
-	alphat--;
-	if (alphat > 1)
-		goto STEP3;
-	else
-		goto STEP5;
+		for (int i = 0; i < alpha; i++) {
+			int j = floor((float)(i + 1) * delta - 1);
+			T.push_back(minimal_separator(niveis, L[j]));
+			for (auto t : T.back()) {
+				in_T[t.label] = true;
+			}
 
-STEP5:
-	
-	Y.push_back(Vertices);
-	k = Y.size();
-	alpha = 0;
-	goto STEP8;
-
-STEP6:
-	alpha = floor(alphat);
-
-	for (int i = 0; i < alpha; i++){
-		int j = floor( (float)(i+1) * delta - 1);
-		T.push_back(minimal_separator(niveis, L[j]));
-		for(auto t: T.back()){
-			in_T[t.label] = true;
 		}
 
+//STEP7:
+
+		Y = connected_components(in_T, Vertices);
+		k = Y.size();
+		for (auto j : T) {
+			Y.push_back(j);
+		}
 	}
 
-STEP7:
-
-	Y = connected_components(in_T, Vertices);
-	k = Y.size();
-	for (auto j: T){
-		Y.push_back(j);
-	}
-
-STEP8:
+//STEP8:
 	vector<int> permutacao(n, -1);
 	int it = 0;
 	for (int i = 0; i < k; i++) {
