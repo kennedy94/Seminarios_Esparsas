@@ -22,7 +22,9 @@ int main(int argc, char *argv[]) {
 		chrono::duration<double> elapsed;
 		//G = transformar_grafo(ORDENACAO_RQV(G, n), G);
 		//G = transformar_grafo(Reversed_Cuthill_Mckee(G, n), G);
-		G = transformar_grafo(ONE_WAY_DISSECTION(G, n), G);
+		//G = transformar_grafo(ONE_WAY_DISSECTION(G, n), G);
+		G = transformar_grafo(NESTED_DISSECTION(G, n), G);
+
 		auto  TEMPO_FIM = chrono::high_resolution_clock::now();
 		elapsed = TEMPO_FIM - TEMPO_COMECO;
 		soma_tempo += elapsed.count();
