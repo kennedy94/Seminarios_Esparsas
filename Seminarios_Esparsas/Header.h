@@ -11,9 +11,9 @@
 #include <climits>
 using namespace std;
 struct vertice;	//estrutura auxiliar para facilitar o acesso dos vértices por grau e marcá-los como visitados
-struct arco;	//estrutura para guardar um arco de um grafo
+struct coordenada;	//estrutura para guardar um arco de um grafo
 void countSort(vector<vertice> &array, int max);
-list<list<vertice>> REFINED_QUOCIENT_TREES(vector<arco> G, int n);
+list<list<vertice>> REFINED_QUOCIENT_TREES(vector<coordenada> G, int n);
 list<vertice> SPAN(vector<vertice> Vertices, int v_label);
 vector<int> countSort_grau(vector<int> graus);
 
@@ -53,18 +53,18 @@ struct vertice {
 	}
 };
 
-struct arco {
+struct coordenada {
 	//dados do arco
 	int i, j;
 	float v;
 	//construtor do arco
-	arco(int i1, int i2, float i3) {
+	coordenada(int i1, int i2, float i3) {
 		i = i1;
 		j = i2;
 		v = i3;
 	}
 
-	arco() {
+	coordenada() {
 		i = -1;
 		j = -1;
 		v = 0.0;
@@ -74,7 +74,7 @@ struct arco {
 
 void insertion_sort_m(vector<vertice> &P);
 
-vector<arco> ler_instancia(const char * filename) {
+vector<coordenada> ler_instancia(const char * filename) {
 	ifstream instancia(filename, ifstream::in);
 	if (instancia.fail()) {
 		cerr << "     Arquivo \"" << filename << "\" nao encontrado." << endl;
@@ -83,20 +83,20 @@ vector<arco> ler_instancia(const char * filename) {
 	int n, tau;
 	instancia >> n >> tau;
 
-	vector<arco> G;
+	vector<coordenada> G;
 	for (int it = 0; it < tau; it++){
 		int i, j; float v;
 
 		instancia >> i >> j >> v;
 		if (i != j)
-			G.push_back(arco(i, j, v));
+			G.push_back(coordenada(i, j, v));
 	}
 	instancia.close();
 
 	return G;
 }
 
-vector<arco> ler_instancia_formato_dif(const char * filename) {
+vector<coordenada> ler_instancia_formato_dif(const char * filename) {
 	ifstream instancia(filename, ifstream::in);
 	if (instancia.fail()) {
 		cerr << "     Arquivo \"" << filename << "\" nao encontrado." << endl;
@@ -105,13 +105,13 @@ vector<arco> ler_instancia_formato_dif(const char * filename) {
 	int n, tau;
 	instancia >> n >> tau;
 
-	vector<arco> G;
+	vector<coordenada> G;
 	for (int it = 0; it < tau; it++) {
 		int i, j, v;
 
 		instancia >> i >> j >> v;
 		if (i != j)
-			G.push_back(arco(i-1, j-1, v));
+			G.push_back(coordenada(i-1, j-1, v));
 	}
 	instancia.close();
 
@@ -119,7 +119,7 @@ vector<arco> ler_instancia_formato_dif(const char * filename) {
 }
 
 
-void imprimir_matriz(vector<arco> G, int n) {
+void imprimir_matriz(vector<coordenada> G, int n) {
 	vector < vector<bool>> MATRIZ(n);
 	for (int i = 0; i < n; i++)
 		MATRIZ[i] = vector<bool>(n, false);
@@ -174,20 +174,20 @@ void inserir_ordenado(vector<vertice> &V, vertice v) {
 //Assuma que a o grafo G é conexo e que a matriz é irredutível
 //retornando o reverso
 
-vector<arco> transformar_grafo(vector<int> permutacao, vector<arco> G) {
+vector<coordenada> transformar_grafo(vector<int> permutacao, vector<coordenada> G) {
 	int n = permutacao.size();
 	vector<int> transformar(n);
 	for (int i = 0; i < n; i++)
 		transformar[permutacao[i]] = i;
 
-	vector<arco> G_new(G.size());
+	vector<coordenada> G_new(G.size());
 	for (int i = 0; i < G.size(); i++)
-		G_new[i] = arco(transformar[G[i].i], transformar[G[i].j], G[i].v);
+		G_new[i] = coordenada(transformar[G[i].i], transformar[G[i].j], G[i].v);
 
 	return G_new;
 }
 
-vector<int> Reversed_Cuthill_Mckee(vector<arco> G, int n) {
+vector<int> Reversed_Cuthill_Mckee(vector<coordenada> G, int n) {
 
 	if (G.size() == 0)
 		return vector<int>(n, -1);
@@ -473,7 +473,7 @@ list<vertice> SPAN(vector<vertice> Vertices, int v_label) {
 	return Y;
 }
 
-void imprimir_matriz_txt(vector<arco> G, int n) {
+void imprimir_matriz_txt(vector<coordenada> G, int n) {
 	ofstream saida("matriz_matlab_trees.txt");
 
 	//saida << n << " " << G.size() << endl;
@@ -707,7 +707,7 @@ int vertice_pseudoperiferico(vector<vertice> Vertices, int r) {
 	return no_p;
 }
 
-vector<int> ORDENACAO_RQV(vector<arco> G, int n) {
+vector<int> ORDENACAO_RQV(vector<coordenada> G, int n) {
 	vector<int> Graus(n, 0);
 	vector<vector<int>> adj(n);
 
@@ -931,7 +931,7 @@ Step_0:
 }
 
 
-vector<int> ONE_WAY_DISSECTION(vector<arco> G, int n) {
+vector<int> ONE_WAY_DISSECTION(vector<coordenada> G, int n) {
 	vector<int> Graus(n, 0);
 	vector<vector<int>> adj(n);
 
@@ -1274,7 +1274,7 @@ int vertice_pseudoperiferico_nested(vector<vertice> Vertices, int r, vector<bool
 
 
 
-vector<int> NESTED_DISSECTION(vector<arco> G, int n) {
+vector<int> NESTED_DISSECTION(vector<coordenada> G, int n) {
 	vector<int> Graus(n, 0);
 	vector<vector<int>> adj(n);
 
@@ -1364,9 +1364,109 @@ vector<int> NESTED_DISSECTION(vector<arco> G, int n) {
 
 	}
 
-
-	
-	
-
 	return permutacao;
 }
+
+vector<float> A_times_x(vector<coordenada> A, vector<float> x) {
+	vector<float> v(x.size(), 0.0);
+
+	for (int i = 0; i < A.size(); i++) {
+		v[A[i].i] += A[i].v * x[A[i].j];
+	}
+
+	return v;
+}
+
+float prod_interno(vector<float> x, vector<float> y) {
+	float sum = 0.0;
+	for (int i = 0; i < x.size(); i++){
+		sum += x[i] * y[i];
+	}
+
+	return sum;
+}
+
+float norm2(vector<float> x) {
+	float sum = 0.0;
+
+	for (int i = 0; i < x.size(); i++)
+		sum += x[i] * x[i];
+
+	return sqrt(sum);
+}
+
+vector<float> alpha_times_x(vector<float> x, float alpha) {
+	for (int i = 0; i < x.size(); i++) {
+		x[i] *= alpha;
+	}
+	return x;
+}
+
+vector<float> x_plus_y(vector<float> x, vector<float> y) {
+	for (int i = 0; i < x.size(); i++) {
+		x[i] += y[i];
+	}
+	return x;
+}
+
+
+vector<coordenada> Laplacian_Matrix(vector<coordenada> G, int n) {
+	vector<int> Graus(n, 0);
+
+	//percorrer o grafo para atualizar graus e conjuntos de adjacência
+	for (int i = 0; i < G.size(); i++) {
+		Graus[G[i].i]++;
+		Graus[G[i].j]++;
+	}
+
+	vector<vertice> V(n);
+	for (int i = 0; i < n; i++)
+		V[i] = vertice(i, Graus[i]);
+	
+	//Inicializar matriz
+	vector<coordenada> L(2*G.size() + n);
+	for (int i = 0; i < n + G.size(); i++) {
+		if (i < n) {
+			L[i].i = i; L[i].j = i;
+			L[i].v = Graus[i];
+		}
+		else {
+			L[i].i = G[i - n].i;
+			L[i].j = G[i - n].j;
+			L[i].v = -1;
+
+			L[i + G.size()].j = G[i - n].i;
+			L[i + G.size()].i = G[i - n].j;
+			L[i + G.size()].v = -1;
+		}
+	}
+
+	A_times_x(L, vector<float>(n, 1.0));
+
+	return L;
+}
+
+//vector<int> Lanczos(vector<coordenada> L, int n) {
+//	vector<float> v(n, 1.0);
+//
+//	//STEP1
+//	vector<float> w = A_times_x(L, v);
+//	float alpha, beta;
+//
+//	alpha = prod_interno(w, v);
+//
+//	w = x_plus_y(w, alpha_times_x(v, -alpha));
+//
+//	//STEP2
+//
+//	beta = norm2(w);
+//	if (beta != 0) {
+//		v = alpha_times_x(w, 1 / beta);
+//	}
+//
+//	w = A_times_x(L, v);
+//	alpha = prod_interno(w, v);
+//	w = x_plus_y(w, )
+//
+//}
+

@@ -8,8 +8,8 @@ int main(int argc, char *argv[]) {
 	instancia >> n >> tau;
 	instancia.close();
 
-	//vector<arco> G = ler_instancia(arquivo);
-	vector<arco> G = ler_instancia_formato_dif(arquivo);
+	//vector<coordenada> G = ler_instancia(arquivo);
+	vector<coordenada> G = ler_instancia_formato_dif(arquivo);
 
 	cout << "Instancia lida!" << endl;
 	cout << "Matriz Original:" << endl;
@@ -24,6 +24,8 @@ int main(int argc, char *argv[]) {
 		//G = transformar_grafo(Reversed_Cuthill_Mckee(G, n), G);
 		//G = transformar_grafo(ONE_WAY_DISSECTION(G, n), G);
 		G = transformar_grafo(NESTED_DISSECTION(G, n), G);
+
+		//Laplacian_Matrix(G, n);
 
 		auto  TEMPO_FIM = chrono::high_resolution_clock::now();
 		elapsed = TEMPO_FIM - TEMPO_COMECO;
