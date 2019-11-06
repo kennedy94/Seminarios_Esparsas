@@ -20,11 +20,11 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <Text Include="matrix_exemplo_15.txt" />
+  </ItemGroup>
+  <ItemGroup>
     <ClInclude Include="Header.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="matrix_exemplo_15.txt" />
   </ItemGroup>
 </Project>

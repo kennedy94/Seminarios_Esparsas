@@ -9,6 +9,9 @@
 #include <list>
 #include <stack>
 #include <climits>
+#include <random>
+
+
 using namespace std;
 struct vertice;	//estrutura auxiliar para facilitar o acesso dos vértices por grau e marcá-los como visitados
 struct coordenada;	//estrutura para guardar um arco de um grafo
@@ -473,8 +476,8 @@ list<vertice> SPAN(vector<vertice> Vertices, int v_label) {
 	return Y;
 }
 
-void imprimir_matriz_txt(vector<coordenada> G, int n) {
-	ofstream saida("matriz_matlab_trees.txt");
+void imprimir_matriz_txt(vector<coordenada> G, int n, string arquivo) {
+	ofstream saida(arquivo);
 
 	//saida << n << " " << G.size() << endl;
 	for (int i = 0; i < n; i++)	{
@@ -1446,27 +1449,292 @@ vector<coordenada> Laplacian_Matrix(vector<coordenada> G, int n) {
 	return L;
 }
 
-//vector<int> Lanczos(vector<coordenada> L, int n) {
-//	vector<float> v(n, 1.0);
+
+//#define episilon 0.00001
 //
-//	//STEP1
-//	vector<float> w = A_times_x(L, v);
-//	float alpha, beta;
+//default_random_engine generator;
 //
-//	alpha = prod_interno(w, v);
+//float phi(vector<float> B, int j) {
+//	normal_distribution<float> randN(0, 0.6);
 //
-//	w = x_plus_y(w, alpha_times_x(v, -alpha));
+//	return episilon * (B[1]/B[j]) * randN(generator);
+//}
 //
-//	//STEP2
+//float theta(vector<float> B, int j, int k) {
+//	normal_distribution<float> randN(0, 0.3);
 //
-//	beta = norm2(w);
-//	if (beta != 0) {
-//		v = alpha_times_x(w, 1 / beta);
-//	}
-//
-//	w = A_times_x(L, v);
-//	alpha = prod_interno(w, v);
-//	w = x_plus_y(w, )
-//
+//	return episilon * (B[k] / B[j]) * randN(generator);
 //}
 
+
+float eig(vector<vector<float>> A){// double *lambda, double *d, double e) {
+	// Trace
+	double T = A[0][0] + A[1][1];
+	// Determinant
+	double D = A[0][0] * A[1][1] - A[0][1] * A[1][0];
+	// Eigenvalues
+	vector<float> lambda(2);
+	lambda[0] = 0.5 * T + sqrt(0.25 * T * T - D);
+	lambda[1] = 0.5 * T - sqrt(0.25 * T * T - D);
+
+
+	return min(lambda[0], lambda[1]);
+}
+
+
+
+vector<vector<float>> Lanczos(vector<coordenada> L, int n, int m) {
+	vector<vector<float>> q(m + 1);
+
+	q[0] = vector<float>(n, 0.0);
+	q[1] = vector<float>(n, 0.0);
+	q[1][0] = 1.0;
+	vector <float> v, alpha(n+1), beta(n+1);
+
+	for (int j = 1; j <= m; j++){
+		v = A_times_x(L, q[j]);
+		alpha[j] = prod_interno(v, q[j]);
+
+		v = x_plus_y(v, alpha_times_x(q[j], -alpha[j]));
+		v = x_plus_y(v, alpha_times_x(q[j-1], -beta[j]));
+
+		
+		beta[j] = norm2(v);
+		if (beta[j] != 0 && j != m)
+			q[j + 1] = alpha_times_x(v, 1 / beta[j]);
+		else
+			break;
+	}
+
+	vector<vector<float>> Retorno(m);
+	for (int i = 0; i < m; i++)
+		Retorno[i] = vector<float>(m);
+
+	for (int i = 0; i < m; i++){
+		Retorno[i][i] = alpha[i + 1];
+		for (int j = i + 1; j < m; j++){
+			Retorno[i][j] = beta[i + 1];
+			Retorno[j][i] = beta[i + 1];
+		}
+	}
+
+	eig(Retorno);
+
+	return Retorno;
+}
+
+
+
+vector<int> grau_min__pseudo_periferico_SLOAN(vector<vertice> V) {
+	vector<vector<vertice>> Ls;
+	
+	//Gerar estrutura de nível enraizada em r
+	vertice aux = *min_element(V.begin(), V.end());
+	int s = aux.label;
+
+	vector<vertice> Q;
+
+	Ls = estrutura_de_nivel(V, s);
+
+
+	int h, m, e;
+
+	bool continua = true;
+	int w, w_min, h_max;
+
+	do{
+		h = Ls.size();
+		m = Ls.back().size();
+
+		sort(Ls.back().begin(), Ls.back().end());
+
+		int m_p = floor((m + 2) / 2.0);
+
+		Q = vector<vertice>(Ls.back().begin(), Ls.back().begin() + m_p);
+
+		w_min = INT_MAX;
+		h_max = h;
+
+		for (int i = 0; i < m_p; i++) {
+			Ls = estrutura_de_nivel(V, Q[i].label);
+			h = Ls.size();
+
+			w = -1;
+			for (int j = i; j < h; j++) {
+				if (w < (int)Ls[j].size()) {
+					w = Ls[j].size();
+				}
+			}
+
+			if (h > h_max && w < w_min) {
+				s = Q[i].label;
+			}
+			else {
+				if (w < w_min) {
+					e = Q[i].label;
+					w_min = w;
+				}
+				continua = false;
+			}
+
+		}
+	} while (continua);
+
+	
+	vector<int> retorno;
+	retorno.push_back(s);
+	retorno.push_back(e);
+
+	return retorno;
+}
+
+
+
+vector<int> Sloan(vector<coordenada> G, int n) {
+
+	vector<int> Graus(n, 0);
+	vector<vector<int>> adj(n);
+
+	//percorrer o grafo para atualizar graus e conjuntos de adjacência
+	for (int i = 0; i < G.size(); i++) {
+		Graus[G[i].i]++;	Graus[G[i].j]++;
+		if (find(adj[G[i].i].begin(), adj[G[i].i].end(), G[i].j) == adj[G[i].i].end())
+			adj[G[i].i].push_back(G[i].j);
+		if (find(adj[G[i].j].begin(), adj[G[i].j].end(), G[i].i) == adj[G[i].j].end())
+			adj[G[i].j].push_back(G[i].i);
+	}
+
+	vector<vertice> Vertices(n);
+	for (int i = 0; i < n; i++) {
+		Vertices[i] = vertice(i, Graus[i]);
+		Vertices[i].adj = adj[i];
+		Vertices[i].particao = -1;
+	}
+
+	Graus.clear();
+	for (auto &i : adj) {
+		i.clear();
+	}
+	adj.clear();
+
+	vector<int> endpoints = grau_min__pseudo_periferico_SLOAN(Vertices);
+	int s = endpoints.front(),
+		e = endpoints.back();
+
+	//Computar distancias Passo 2
+	vector<vector<vertice>> Le = estrutura_de_nivel(Vertices, e);
+
+	vector<int> Numeracao_por_Particao(Le.size());
+
+	Numeracao_por_Particao[0] = 0;
+
+	int iterador_p = 0, soma = Vertices.size();
+	for (auto p : Le) {
+		soma -= p.size();
+		Numeracao_por_Particao[iterador_p] = soma;
+		iterador_p++;
+	}
+
+
+	vector<int> distancia_de_e(n);
+	for (int i = 0; i < (int)Le.size(); i++) {
+		for (auto v : Le[i]){
+			distancia_de_e[v.label] = i;
+		}
+	}
+
+	vector<int> ativo(n, 0);/*
+					  0 - invativo
+					  1 - posativo
+					  2 - ativo
+					  3 - preativo*/
+
+	vector<int> P(n);
+	int W1 = 2, W2 = 1;
+
+	vector<int> Ni(n);
+	for (auto v : Vertices){
+		Ni[v.label] = v.grau + 1;
+	}
+
+
+	for (int i = 0; i < n; i++){
+		P[i] = W1 * (n - Ni[i]) + W2 * distancia_de_e[i];
+	}
+
+	list<int> fila;
+
+	fila.push_front(s);
+	ativo[s] = 3;
+	vector<int> permutacao(n, -1);
+
+
+	int ip = 0;
+	while (!fila.empty()) {
+		int highest_p = -1,
+			i;
+		//STEP6
+		for (auto v : fila) {
+			if (P[v] > highest_p) {
+				highest_p = P[v];
+				i = v;
+			}
+		}
+		//STEP7
+		fila.remove(i);
+
+		if (ativo[i] == 3) {
+			for (auto j : Vertices[i].adj) {
+				P[j] += W1;
+				if (!ativo[j]) {
+					fila.push_back(j);
+					ativo[j] = 3;
+				}
+			}
+		}
+
+		//STEP8
+		permutacao[Numeracao_por_Particao[distancia_de_e[i]]] = i;
+		Numeracao_por_Particao[distancia_de_e[i]]++;
+
+
+		ativo[i] = 1;
+
+		//STEP9
+		for (auto j : Vertices[i].adj) {
+
+			if (ativo[j] == 3) {
+				P[j] += W1;
+				ativo[j] = 2;
+				for (auto k : Vertices[j].adj) {
+					if (ativo[k] == 2 || ativo[k] == 3) {
+						P[k] += W1;
+					}
+					else {
+						if (!ativo[k]) {//inativo
+							P[k] += W1;
+							fila.push_back(k);
+							ativo[k] = 3;
+						}
+					}
+				}
+			}
+		}
+
+	}
+
+	return permutacao;
+}
+
+
+int calcular_banda(vector<coordenada> G, int n) {
+	int max = -1;
+
+	for (auto arco: G){
+		int valor = abs(arco.i - arco.j);
+		if (valor > max)
+			max = valor;
+	}
+
+	return max;
+}
