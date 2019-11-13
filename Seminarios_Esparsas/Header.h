@@ -110,11 +110,12 @@ vector<coordenada> ler_instancia_formato_dif(const char * filename) {
 
 	vector<coordenada> G;
 	for (int it = 0; it < tau; it++) {
-		int i, j, v;
+		int i, j;
+		float v;
 
 		instancia >> i >> j >> v;
 		if (i != j)
-			G.push_back(coordenada(i-1, j-1, v));
+			G.push_back(coordenada(i-1, j-1, 1));
 	}
 	instancia.close();
 
@@ -1539,7 +1540,7 @@ vector<int> grau_min__pseudo_periferico_SLOAN(vector<vertice> V) {
 
 	int h, m, e;
 
-	bool continua = true;
+	bool melhorou;
 	int w, w_min, h_max;
 
 	do{
@@ -1554,7 +1555,7 @@ vector<int> grau_min__pseudo_periferico_SLOAN(vector<vertice> V) {
 
 		w_min = INT_MAX;
 		h_max = h;
-
+		melhorou = false;
 		for (int i = 0; i < m_p; i++) {
 			Ls = estrutura_de_nivel(V, Q[i].label);
 			h = Ls.size();
@@ -1568,17 +1569,18 @@ vector<int> grau_min__pseudo_periferico_SLOAN(vector<vertice> V) {
 
 			if (h > h_max && w < w_min) {
 				s = Q[i].label;
+				melhorou = true;
+				break;
 			}
 			else {
 				if (w < w_min) {
 					e = Q[i].label;
 					w_min = w;
 				}
-				continua = false;
 			}
 
 		}
-	} while (continua);
+	} while (melhorou);
 
 	
 	vector<int> retorno;
@@ -1671,6 +1673,19 @@ vector<int> Sloan(vector<coordenada> G, int n) {
 
 	int ip = 0;
 	while (!fila.empty()) {
+		/*cout << "Q = [";
+		for (auto elemento: fila){
+			cout << elemento + 1 << " ";
+		}
+		cout << "]" << endl;
+
+		cout << "P = [";
+		for (auto elemento : fila) {
+			cout << P[elemento] << " ";
+		}
+		cout << "]" << endl << endl;*/
+
+
 		int highest_p = -1,
 			i;
 		//STEP6
@@ -1737,4 +1752,18 @@ int calcular_banda(vector<coordenada> G, int n) {
 	}
 
 	return max;
+}
+
+
+int envelope(vector<coordenada> G, int n) {
+	vector<int> e(n, 0);
+
+	for (auto t : G){
+		if (t.i > t.j && t.i - t.j > e[t.i])
+			e[t.i] = t.i - t.j;
+		if (t.j > t.i && t.j - t.i > e[t.j])
+			e[t.j] = t.j - t.i;
+	}
+
+	return accumulate(e.begin(), e.end(), 0)*2 + n;
 }

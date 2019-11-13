@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
 
 	cout << "Instancia lida!" << endl;
 	cout << "Matriz Original:" << endl;
-	//imprimir_matriz(G, n);
+	
 	
 	
 	float soma_tempo = 0.0;
@@ -38,9 +38,13 @@ int main(int argc, char *argv[]) {
 	}
 	cout << "Média de tempo em segundos: " << soma_tempo/1 << endl;
 	
-	cout << "\n\nMatriz Reordenada:\n";
+	
+	//cout << "\n\nMatriz Original:\n";
+	//imprimir_matriz(G, n);
+	//cout << endl;
+	//cout << "\n\nMatriz RCM:\n";
 	//imprimir_matriz(G1, n);
-	cout << endl;
+	//cout << "\n\nMatriz Sloan:\n";
 	//imprimir_matriz(G2, n);
 
 
@@ -48,9 +52,14 @@ int main(int argc, char *argv[]) {
 
 	cout << "Sloan = " << calcular_banda(G2, n) << endl;
 
-	imprimir_matriz_txt(G, n, "85_original.dat");
-	imprimir_matriz_txt(G1, n, "85_RCM.dat");
-	imprimir_matriz_txt(G2, n, "85_SLOAN.dat");
+	imprimir_matriz_txt(G, n, "ex.dat");
+	imprimir_matriz_txt(G1, n, "ex_rcm.dat");
+	imprimir_matriz_txt(G2, n, "ex_sloan.dat");
+	cout << "env: " << envelope(G, n) << endl;
+	cout << "env: " << envelope(G1, n) << endl;
+	cout << "env: " << envelope(G2, n) << endl;
+
+
 
 	/*vector<int> v = { 3,1,2,2,1,3,2,2 };
 	insertion_sort_m(v);*/
