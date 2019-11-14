@@ -39,13 +39,13 @@ int main(int argc, char *argv[]) {
 	cout << "Média de tempo em segundos: " << soma_tempo/1 << endl;
 	
 	
-	//cout << "\n\nMatriz Original:\n";
-	//imprimir_matriz(G, n);
-	//cout << endl;
-	//cout << "\n\nMatriz RCM:\n";
-	//imprimir_matriz(G1, n);
-	//cout << "\n\nMatriz Sloan:\n";
-	//imprimir_matriz(G2, n);
+	/*cout << "\n\nMatriz Original:\n";
+	imprimir_matriz(G, n);
+	cout << endl;
+	cout << "\n\nMatriz RCM:\n";
+	imprimir_matriz(G1, n);
+	cout << "\n\nMatriz Sloan:\n";
+	imprimir_matriz(G2, n);*/
 
 
 	cout << "Cuthill McKee = " << calcular_banda(G1, n) << endl;
@@ -59,10 +59,6 @@ int main(int argc, char *argv[]) {
 	cout << "env: " << envelope(G1, n) << endl;
 	cout << "env: " << envelope(G2, n) << endl;
 
-
-
-	/*vector<int> v = { 3,1,2,2,1,3,2,2 };
-	insertion_sort_m(v);*/
 
 	return 0;
 }

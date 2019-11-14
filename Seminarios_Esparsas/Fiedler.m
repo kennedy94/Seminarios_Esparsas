@@ -10,6 +10,7 @@ function [p1, p2, v,d] = Fiedler(A)
   S = A | A' | speye(n);
   
   S = diag(sum(S)) - S;
+  
   [v,d] = eigs(S, 2, 'SA', opt);
   
   v = v(:, 2);
